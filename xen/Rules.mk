@@ -63,6 +63,7 @@ CFLAGS += -pipe -D__XEN__ -include $(BASEDIR)/include/xen/config.h
 
 ifeq ($(armds),y)
 CFLAGS += -nostdlibinc -nostdlib -Wno-unused-command-line-argument
+CFLAGS += -include $(BASEDIR)/include/asm/armds.h
 endif
 
 CFLAGS-$(CONFIG_DEBUG_INFO) += -g
