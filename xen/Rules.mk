@@ -218,6 +218,22 @@ SPECIAL_DATA_SECTIONS := rodata $(foreach a,1 2 4 8 16, \
 					    rodata.cst$(a)) \
 			 $(foreach r,rel rel.ro,data.$(r).local)
 
+ifeq ($(armds),y)
+$(filter %.init.o,$(obj-y) $(obj-bin-y) $(extra-y)): %.init.o: %.o Makefile
+	fromelf --text $< | grep -e '** Section #' -A 1 | while read section; do \
+		name=$$(echo "$$section" | cut -d "'" -f 2 -); \
+		read s1 s2 sz rest; \
+		case "$$name" in \
+		.*.local) ;; \
+		.text|.text.*|.data|.data.*|.bss) \
+			test $$sz != 0 || continue; \
+			echo "Error: size of $<:$$name is 0x$$sz" >&2; \
+			exit $$(expr $$idx + 1);; \
+		esac; \
+		read delimiter; \
+	done
+	fromelf --elf $(foreach s,$(SPECIAL_DATA_SECTIONS),--rename=$(s)=.init.$(s)) --output $@ $<
+else
 $(filter %.init.o,$(obj-y) $(obj-bin-y) $(extra-y)): %.init.o: %.o Makefile
 	$(OBJDUMP) -h $< | sed -n '/[0-9]/{s,00*,0,g;p;}' | while read idx name sz rest; do \
 		case "$$name" in \
@@ -229,6 +245,7 @@ $(filter %.init.o,$(obj-y) $(obj-bin-y) $(extra-y)): %.init.o: %.o Makefile
 		esac; \
 	done
 	$(OBJCOPY) $(foreach s,$(SPECIAL_DATA_SECTIONS),--rename-section .$(s)=.init.$(s)) $< $@
+endif
 
 %.i: %.c Makefile
 	$(CPP) $(filter-out -Wa$(comma)%,$(CFLAGS)) $< -o $@
