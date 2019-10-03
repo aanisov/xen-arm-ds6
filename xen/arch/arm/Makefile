@@ -83,10 +83,15 @@ else
 all_symbols =
 endif
 
+ifeq ($(armds),y)
+$(TARGET): $(TARGET)-syms
+	fromelf --bin $< --output $@
+else
 $(TARGET): $(TARGET)-syms
 	$(OBJCOPY) -O binary -S $< $@
 ifeq ($(CONFIG_ARM_64),y)
 	ln -sf $(notdir $@)  ../../$(notdir $@).efi
+endif
 endif
 
 ifeq ($(CONFIG_LTO),y)
@@ -104,7 +109,7 @@ endif
 
 ifeq ($(armds),y)
 $(TARGET)-syms: prelink.o xen.scat
-	armlink --scatter="xen.scat" --edit="xen.steer" --no_scanlib $(LDFLAGS) prelink.o $(BASEDIR)/common/symbols-dummy.o -o $@
+	armlink --scatter="xen.scat" --edit="xen.steer" --no_scanlib --symdefs="$(@D)/$(@F).map" $(LDFLAGS) prelink.o $(BASEDIR)/common/symbols-dummy.o -o $@
 else
 $(TARGET)-syms: prelink.o xen.lds
 	$(LD) $(LDFLAGS) -T xen.lds -N prelink.o \
