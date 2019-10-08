@@ -1,1 +1,6 @@
 RESOLVE _srodata AS Load$$_rodata_bug_frames_0$$Base
+RESOLVE _start AS Load$$_text$$Base 
+RESOLVE _stext AS Load$$_text$$Base
+RESOLVE _etext AS Load$$_text$$Limit
+RESOLVE _sinittext AS Load$$_init_text$$Base 
+RESOLVE _einittext AS Load$$_init_text$$Limit

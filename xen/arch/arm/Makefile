@@ -63,6 +63,10 @@ obj-y += vsmc.o
 obj-y += vpsci.o
 obj-y += vuart.o
 
+ifeq ($(armds),y)
+obj-y += armds.o
+endif
+
 #obj-bin-y += ....o
 
 ifdef CONFIG_DTB_FILE
@@ -109,7 +113,16 @@ endif
 
 ifeq ($(armds),y)
 $(TARGET)-syms: prelink.o xen.scat
-	armlink --scatter="xen.scat" --edit="xen.steer" --no_scanlib --symdefs="$(@D)/$(@F).map" $(LDFLAGS) prelink.o $(BASEDIR)/common/symbols-dummy.o -o $@
+	armlink --scatter="xen.scat" --edit="xen.steer" --no_scanlib $(LDFLAGS) prelink.o $(BASEDIR)/common/symbols-dummy.o -o $(@D)/.$(@F).0
+	$(NM) -pa --format=sysv $(@D)/.$(@F).0 \
+		| $(BASEDIR)/tools/symbols $(all_symbols) --sysv --sort >$(@D)/.$(@F).0.S
+	$(MAKE) -f $(BASEDIR)/Rules.mk $(@D)/.$(@F).0.o
+	armlink --scatter="xen.scat" --edit="xen.steer" --no_scanlib $(LDFLAGS) prelink.o $(@D)/.$(@F).0.o -o $(@D)/.$(@F).1
+	$(NM) -pa --format=sysv $(@D)/.$(@F).1 \
+		| $(BASEDIR)/tools/symbols $(all_symbols) --sysv --sort >$(@D)/.$(@F).1.S
+	$(MAKE) -f $(BASEDIR)/Rules.mk $(@D)/.$(@F).1.o
+	armlink --scatter="xen.scat" --edit="xen.steer" --no_scanlib --symdefs="$(@D)/$(@F).map" $(LDFLAGS) prelink.o $(build_id_linker) $(@D)/.$(@F).1.o -o $@
+	rm -f $(@D)/.$(@F).[0-9]*
 else
 $(TARGET)-syms: prelink.o xen.lds
 	$(LD) $(LDFLAGS) -T xen.lds -N prelink.o \
