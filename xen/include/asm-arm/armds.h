@@ -1,7 +1,7 @@
-#define _start                      Load$$_text$$Base
-#define _stext                      Load$$_text$$Base
+//#define _start                      Load$$_text$$Base
+//#define _stext                      Load$$_text$$Base
 
-#define _etext                      Load$$_text$$Limit
+//#define _etext                      Load$$_text$$Limit
 
 //#define _srodata                    Load$$_rodata_bug_frames_0$$Base
 #define __start_bug_frames          Load$$_rodata_bug_frames_0$$Base
@@ -60,8 +60,8 @@
 #define _aedevice                   Load$$_adev_info$$Limit
 
 #define __init_begin                Load$$_init_text$$Base
-#define _sinittext                  Load$$_init_text$$Base
-#define _einittext                  Load$$_init_text$$Limit
+//#define _sinittext                  Load$$_init_text$$Base
+//#define _einittext                  Load$$_init_text$$Limit
 
 #define __setup_start               Load$$_init_setup$$Base
 #define __setup_end                 Load$$_init_setup$$Limit
